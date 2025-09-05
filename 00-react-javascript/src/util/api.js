@@ -26,4 +26,27 @@ const getUserApi = async () => {
   return instance.get(URL_API);
 };
 
-export { createUserApi, loginApi, getUserApi };
+const getAllCateApi = async () => {
+  const URL_API = "/v1/api/category";
+  return instance.get(URL_API);
+};
+
+// util/api.js
+const getProductsByCateApi = async (cateId, page = 1, limit = 2) => {
+  const URL_API = `/v1/api/product/${cateId}?page=${page}&limit=${limit}`;
+  return instance.get(URL_API);
+};
+
+const getAllProducts = async (page = 1, limit = 2) => {
+  const URL_API = `/v1/api/product?page=${page}&limit=${limit}`;
+  return instance.get(URL_API);
+};
+
+export {
+  createUserApi,
+  loginApi,
+  getUserApi,
+  getAllCateApi,
+  getProductsByCateApi,
+  getAllProducts,
+};

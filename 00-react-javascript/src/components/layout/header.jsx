@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { MailOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  MailOutlined,
+  ProductFilled,
+  SettingOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Menu } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -14,9 +19,13 @@ const Header = () => {
     {
       label: <Link to={"/users"}>Users</Link>,
       key: "users",
-      icon: <MailOutlined />,
+      icon: <UserOutlined />,
     },
-
+    {
+      label: <Link to={"/products"}>Products</Link>,
+      key: "products",
+      icon: <ProductFilled />,
+    },
     {
       label: "Welcome TT",
       key: "SubMenu",

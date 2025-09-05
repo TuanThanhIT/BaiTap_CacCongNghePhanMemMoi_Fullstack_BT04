@@ -5,6 +5,7 @@ const configViewEngine = require("./config/viewEngine");
 const apiRoutes = require("./routes/api");
 const connection = require("./config/database");
 const { getHomepage } = require("./controllers/homeController");
+const errorHandlingMiddleware = require("./middleware/errorHandling");
 
 const app = express();
 
@@ -22,6 +23,8 @@ configViewEngine(app);
 
 //khai báo route
 app.use("/v1/api/", apiRoutes);
+
+app.use(errorHandlingMiddleware);
 // app.use('/', getHomepage);
 
 (async () => {
