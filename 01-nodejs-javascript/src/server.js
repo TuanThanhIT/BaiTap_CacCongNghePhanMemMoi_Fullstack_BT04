@@ -6,6 +6,7 @@ const apiRoutes = require("./routes/api");
 const connection = require("./config/database");
 const { getHomepage } = require("./controllers/homeController");
 const errorHandlingMiddleware = require("./middleware/errorHandling");
+const setupElasticsearch = require("./utils/elasticsearchSetup");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use(errorHandlingMiddleware);
     //using mongoose
     await connection();
 
+    await setupElasticsearch();
     app.listen(port, () => {
       console.log(`Backend Nodejs App listening on port ${port}`);
     });

@@ -32,13 +32,39 @@ const getAllCateApi = async () => {
 };
 
 // util/api.js
-const getProductsByCateApi = async (cateId, page = 1, limit = 2) => {
-  const URL_API = `/v1/api/product/${cateId}?page=${page}&limit=${limit}`;
+
+// Lấy sản phẩm theo category + search + min/max price + phân trang
+const getProductsByCateApi = async (
+  cateId,
+  page = 1,
+  limit = 2,
+  search = "",
+  minPrice,
+  maxPrice
+) => {
+  let URL_API = `/v1/api/product/${cateId}?page=${page}&limit=${limit}`;
+
+  if (search) URL_API += `&search=${encodeURIComponent(search)}`;
+  if (minPrice !== undefined) URL_API += `&minPrice=${minPrice}`;
+  if (maxPrice !== undefined) URL_API += `&maxPrice=${maxPrice}`;
+
   return instance.get(URL_API);
 };
 
-const getAllProducts = async (page = 1, limit = 2) => {
-  const URL_API = `/v1/api/product?page=${page}&limit=${limit}`;
+// Lấy tất cả sản phẩm + search + min/max price + phân trang
+const getAllProducts = async (
+  page = 1,
+  limit = 2,
+  search = "",
+  minPrice,
+  maxPrice
+) => {
+  let URL_API = `/v1/api/product?page=${page}&limit=${limit}`;
+
+  if (search) URL_API += `&search=${encodeURIComponent(search)}`;
+  if (minPrice !== undefined) URL_API += `&minPrice=${minPrice}`;
+  if (maxPrice !== undefined) URL_API += `&maxPrice=${maxPrice}`;
+
   return instance.get(URL_API);
 };
 

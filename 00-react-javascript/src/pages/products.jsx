@@ -9,12 +9,16 @@ import {
   Badge,
   Empty,
   Pagination,
+  Input,
+  Button,
+  InputNumber,
 } from "antd";
 import CategoryList from "../components/categoryList";
 import { getAllProducts, getProductsByCateApi } from "../util/api";
 
 const { Title } = Typography;
 const { Meta } = Card;
+const { Search } = Input;
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -23,21 +27,30 @@ const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [selectedCate, setSelectedCate] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState(undefined);
+  const [maxPrice, setMaxPrice] = useState(undefined);
 
   const pageSize = 2;
-  const fetchProducts = async (page, cateId) => {
+
+  const fetchProducts = async (page, cateId, search = "", minP, maxP) => {
     setLoading(true);
     try {
       let res;
       if (cateId) {
-        res = await getProductsByCateApi(cateId, page, pageSize);
+        res = await getProductsByCateApi(
+          cateId,
+          page,
+          pageSize,
+          search,
+          minP,
+          maxP
+        );
       } else {
-        res = await getAllProducts(page, pageSize);
+        res = await getAllProducts(page, pageSize, search, minP, maxP);
       }
 
-      // ⚠️ res.data phải theo đúng cấu trúc backend trả về
-      // { products, currentPage, totalPages, totalItems }
-      const data = res;
+      const data = res; // res.data mới chứa data từ backend
       setProducts(data.products || []);
       setTotalItems(data.totalItems || 0);
       setCurrentPage(data.currentPage || 1);
@@ -54,24 +67,35 @@ const ProductsPage = () => {
 
   // Load ban đầu
   useEffect(() => {
-    fetchProducts(1, null);
+    fetchProducts(1, selectedCate, searchTerm, minPrice, maxPrice);
   }, []);
 
   // Chọn category
   const handleSelectCategory = (cateId) => {
     setSelectedCate(cateId);
-    fetchProducts(1, cateId); // reset về trang 1 khi đổi cate
+    fetchProducts(1, cateId, searchTerm, minPrice, maxPrice);
   };
 
   // Chuyển trang
   const handlePageChange = (page) => {
-    fetchProducts(page, selectedCate);
+    fetchProducts(page, selectedCate, searchTerm, minPrice, maxPrice);
+  };
+
+  // Khi search
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    fetchProducts(1, selectedCate, value, minPrice, maxPrice);
+  };
+
+  // Khi filter theo giá
+  const handleFilterPrice = () => {
+    fetchProducts(1, selectedCate, searchTerm, minPrice, maxPrice);
   };
 
   if (loading)
     return (
       <div style={{ textAlign: "center", marginTop: 50 }}>
-        <Spin size="large" tip="Đang tải dữ liệu..." />
+        <Spin size="large" />
       </div>
     );
 
@@ -84,9 +108,52 @@ const ProductsPage = () => {
 
   return (
     <div style={{ padding: 20 }}>
-      <Title level={2} style={{ textAlign: "left", marginBottom: 30 }}>
+      <Title level={2} style={{ textAlign: "left", marginBottom: 20 }}>
         🛒 Trang sản phẩm
       </Title>
+
+      {/* Search + Price filter */}
+      <div
+        style={{
+          marginBottom: 20,
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <Search
+          placeholder="Tìm kiếm sản phẩm..."
+          enterButton="Tìm"
+          allowClear
+          onSearch={handleSearch}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ flex: 2, minWidth: 200 }}
+        />
+        <InputNumber
+          placeholder="Giá từ"
+          min={0}
+          value={minPrice}
+          onChange={(value) => setMinPrice(value)}
+          style={{ width: 100 }}
+        />
+        <InputNumber
+          placeholder="Giá đến"
+          min={0}
+          value={maxPrice}
+          onChange={(value) => setMaxPrice(value)}
+          style={{ width: 100 }}
+        />
+        <Button
+          type="primary"
+          onClick={handleFilterPrice}
+          style={{ height: 32 }}
+        >
+          Lọc
+        </Button>
+      </div>
+
       <Row gutter={16}>
         {/* Cột danh mục */}
         <Col xs={24} sm={6}>
@@ -101,7 +168,7 @@ const ProductsPage = () => {
             <>
               <Row gutter={[16, 16]}>
                 {products.map((product) => (
-                  <Col xs={24} sm={12} md={8} key={product._id}>
+                  <Col xs={24} sm={12} md={8} key={product.id || product._id}>
                     <Badge.Ribbon
                       text={`Còn ${product.stock} sp`}
                       color={product.stock > 0 ? "green" : "red"}
@@ -150,7 +217,6 @@ const ProductsPage = () => {
                 ))}
               </Row>
 
-              {/* Pagination */}
               <div style={{ textAlign: "center", marginTop: 20 }}>
                 <Pagination
                   current={currentPage}

@@ -2,6 +2,9 @@ const { StatusCodes } = require("http-status-codes");
 const ApiError = require("../utils/apiError");
 const Category = require("../models/category");
 const Product = require("../models/product");
+const { Client } = require("@elastic/elasticsearch");
+
+const client = new Client({ node: "http://localhost:9200" });
 
 const createProductService = async (
   name,
@@ -36,26 +39,127 @@ const createProductService = async (
   }
 };
 
-const getAllProductByCateService = async (cateId, page, limit) => {
-  const skip = (page - 1) * limit;
+const getAllProductByCateService = async (
+  cateId,
+  search,
+  minPrice,
+  maxPrice,
+  page,
+  limit
+) => {
+  try {
+    const from = (page - 1) * limit;
 
-  const [products, totalItems] = await Promise.all([
-    Product.find({ category: cateId }).skip(skip).limit(limit),
-    Product.countDocuments({ category: cateId }),
-  ]);
+    const range = {};
+    if (minPrice !== undefined) range.gte = minPrice;
+    if (maxPrice !== undefined) range.lte = maxPrice;
 
-  return { products, totalItems };
+    const query = {
+      bool: {
+        must: [],
+        filter: [{ term: { category: cateId } }], // luôn lọc category
+      },
+    };
+
+    if (search) {
+      query.bool.must.push({
+        multi_match: {
+          query: search,
+          fields: ["name", "description"],
+          fuzziness: "AUTO",
+          prefix_length: 1,
+          max_expansions: 50,
+        },
+      });
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query.bool.filter.push({ range: { price: range } });
+    }
+
+    const response = await client.search({
+      index: "products",
+      from,
+      size: limit,
+      query,
+    });
+
+    const products = response.hits.hits.map((hit) => ({
+      id: hit._id,
+      ...hit._source,
+    }));
+
+    const totalItems = response.hits.total.value;
+
+    return { products, totalItems };
+  } catch (err) {
+    console.error("Elasticsearch query error:", err);
+    throw err;
+  }
 };
 
-const getAllProductService = async (page, limit) => {
-  const skip = (page - 1) * limit;
+const getAllProductService = async (
+  search,
+  minPrice,
+  maxPrice,
+  page,
+  limit
+) => {
+  try {
+    const from = (page - 1) * limit;
 
-  const [products, totalItems] = await Promise.all([
-    Product.find().select("-category").skip(skip).limit(limit),
-    Product.countDocuments(),
-  ]);
+    const range = {};
+    if (minPrice !== undefined) range.gte = minPrice;
+    if (maxPrice !== undefined) range.lte = maxPrice;
 
-  return { products, totalItems };
+    // Tạo query
+    const query = {
+      bool: {
+        must: [],
+        filter: [],
+      },
+    };
+
+    if (search) {
+      query.bool.must.push({
+        multi_match: {
+          query: search,
+          fields: ["name", "description"],
+          fuzziness: "AUTO",
+          prefix_length: 1,
+          max_expansions: 50,
+        },
+      });
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query.bool.filter.push({ range: { price: range } });
+    }
+
+    if (query.bool.must.length === 0 && query.bool.filter.length === 0) {
+      // Nếu không có search + filter, match_all
+      query.bool = { must: { match_all: {} } };
+    }
+
+    const response = await client.search({
+      index: "products",
+      from,
+      size: limit,
+      query,
+    });
+
+    const products = response.hits.hits.map((hit) => ({
+      id: hit._id,
+      ...hit._source,
+    }));
+
+    const totalItems = response.hits.total.value;
+
+    return { products, totalItems };
+  } catch (err) {
+    console.error("Elasticsearch query error:", err);
+    throw err;
+  }
 };
 
 module.exports = {
