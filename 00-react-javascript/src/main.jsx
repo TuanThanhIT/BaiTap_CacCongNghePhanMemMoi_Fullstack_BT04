@@ -8,6 +8,7 @@ import UsersPage from "./pages/users";
 import HomePage from "./pages/home";
 import LoginPage from "./pages/login";
 import ProductsPage from "./pages/products";
+import { AuthWrapper } from "./components/context/authContext";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />,
+    <AuthWrapper>
+      <RouterProvider router={router} />,
+    </AuthWrapper>
   </React.StrictMode>
 );

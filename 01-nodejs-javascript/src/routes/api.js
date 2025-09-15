@@ -3,6 +3,7 @@ const {
   createUser,
   userLogin,
   getUser,
+  getAccount,
 } = require("../controllers/userController");
 const multer = require("multer");
 
@@ -28,6 +29,7 @@ routerAPI.get("/", (req, res) => {
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", userLogin);
 routerAPI.get("/users", getUser);
+routerAPI.get("/account", getAccount);
 
 var uploader = multer({
   storage: multer.diskStorage({}),

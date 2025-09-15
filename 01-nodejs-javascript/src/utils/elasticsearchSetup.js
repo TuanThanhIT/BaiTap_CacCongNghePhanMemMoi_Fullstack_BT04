@@ -41,7 +41,7 @@ async function setupElasticsearch() {
       console.log("Index 'products' đã tồn tại, bỏ qua tạo lại.");
     }
 
-    // 2️⃣ Đồng bộ dữ liệu MongoDB sang Elasticsearch (batch 100 documents/lần)
+    // Đồng bộ dữ liệu MongoDB sang Elasticsearch (batch 100 documents/lần)
     const products = await Product.find();
     if (products.length === 0) {
       console.log("Không có dữ liệu MongoDB để đồng bộ.");

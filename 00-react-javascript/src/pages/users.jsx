@@ -42,7 +42,7 @@ const UsersPage = () => {
   return (
     <div style={{ padding: 30 }}>
       {" "}
-      <Table bordered dataSource={dataSource} columns={columns} />;
+      <Table bordered dataSource={dataSource} columns={columns} />
     </div>
   );
 };

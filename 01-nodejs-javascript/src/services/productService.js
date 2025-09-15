@@ -27,7 +27,26 @@ const createProductService = async (
       stock,
       images,
     });
-    return product.save();
+    const savedProduct = await product.save();
+
+    // ✅ Đồng bộ sang Elasticsearch
+    await client.index({
+      index: "products",
+      id: savedProduct._id.toString(),
+      document: {
+        name: savedProduct.name,
+        description: savedProduct.description,
+        price: savedProduct.price,
+        category: savedProduct.category?.toString() || "",
+        stock: savedProduct.stock,
+        images: savedProduct.images,
+        createdAt: savedProduct.createdAt,
+        updatedAt: savedProduct.updatedAt,
+      },
+      refresh: true,
+    });
+
+    return savedProduct;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
