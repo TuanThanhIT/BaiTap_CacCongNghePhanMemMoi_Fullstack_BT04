@@ -181,8 +181,48 @@ const getAllProductService = async (
   }
 };
 
+const getSimilarProductService = async (productId) => {
+  try {
+    const productExisting = await Product.findById(productId);
+
+    if (!productExisting) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Sản phẩm không tồn tại");
+    }
+
+    const similarProducts = await Product.find({
+      category: productExisting.category,
+      _id: { $ne: productExisting._id },
+    })
+      .limit(5)
+      .lean();
+
+    console.log(">>>", similarProducts);
+
+    return similarProducts;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const getProductDetailService = async (productId) => {
+  try {
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      throw new Api(StatusCodes.BAD_REQUEST, "Sản phẩm không tồn tại");
+    }
+    return existingProduct.populate("category");
+  } catch (error) {
+    throw new Api(StatusCodes.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
 module.exports = {
   createProductService,
   getAllProductByCateService,
   getAllProductService,
+  getSimilarProductService,
+  getProductDetailService,
 };

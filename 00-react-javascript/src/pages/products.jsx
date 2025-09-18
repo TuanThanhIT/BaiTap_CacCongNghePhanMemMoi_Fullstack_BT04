@@ -12,9 +12,19 @@ import {
   Input,
   Button,
   InputNumber,
+  notification,
 } from "antd";
 import CategoryList from "../components/categoryList";
-import { getAllProducts, getProductsByCateApi } from "../util/api";
+import {
+  addFavoriteApi,
+  deleteFavoriteApi,
+  getAllProductsApi,
+  getFavoritesApi,
+  getProductsByCateApi,
+  getViewedApi,
+} from "../util/api";
+import { EyeFilled, EyeOutlined, HeartFilled } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
 const { Meta } = Card;
@@ -30,6 +40,67 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [minPrice, setMinPrice] = useState(undefined);
   const [maxPrice, setMaxPrice] = useState(undefined);
+
+  const [favorites, setFavorites] = useState([]);
+  const [viewed, setViewed] = useState([]);
+  const navigate = useNavigate();
+
+  // Lấy danh sách yêu thích
+  const fetchFavorites = async () => {
+    try {
+      const res = await getFavoritesApi();
+      setFavorites(res.favorites || []);
+    } catch (err) {
+      // Vì interceptor đã trả về err.response.data nên err chính là object { statusCode, message }
+      setError(err?.message || "Có lỗi xảy ra, vui lòng thử lại sau!");
+    }
+  };
+
+  const fetchViewed = async () => {
+    try {
+      const res = await getViewedApi();
+      console.log(">>>>>", res.recentlyViewed);
+
+      setViewed(res.recentlyViewed);
+    } catch (error) {
+      // Vì interceptor đã trả về err.response.data nên err chính là object { statusCode, message }
+      setError(error?.message || "Có lỗi xảy ra, vui lòng thử lại sau!");
+    }
+  };
+
+  useEffect(() => {
+    fetchFavorites();
+    fetchViewed();
+  }, []);
+
+  const checkViewed = (productId) => {
+    return viewed.some((item) => item.product === productId);
+  };
+
+  const toggleFavorite = async (productId) => {
+    try {
+      const isFavorite = favorites.some((p) => p._id === productId);
+
+      if (isFavorite) {
+        const res = await deleteFavoriteApi(productId);
+        setFavorites((prev) => prev.filter((p) => p._id !== productId));
+        notification.error({
+          message: "Thông báo",
+          description: res.message,
+        });
+      } else {
+        const res = await addFavoriteApi(productId);
+        await fetchFavorites();
+        notification.success({
+          message: "Thông báo",
+          description: res.message,
+        });
+      }
+    } catch (err) {
+      console.error("Lỗi khi toggle favorites:", err);
+      setError(err?.message || "Xử lý yêu thích thất bại, vui lòng thử lại!");
+    }
+  };
 
   const pageSize = 2;
 
@@ -47,7 +118,7 @@ const ProductsPage = () => {
           maxP
         );
       } else {
-        res = await getAllProducts(page, pageSize, search, minP, maxP);
+        res = await getAllProductsApi(page, pageSize, search, minP, maxP);
       }
 
       const data = res; // res.data mới chứa data từ backend
@@ -115,7 +186,7 @@ const ProductsPage = () => {
 
   return (
     <div style={{ padding: 20 }}>
-      <Title level={2} style={{ textAlign: "left", marginBottom: 20 }}>
+      <Title level={3} style={{ textAlign: "left", marginBottom: 20 }}>
         🛒 Trang sản phẩm
       </Title>
 
@@ -198,6 +269,7 @@ const ProductsPage = () => {
                             }}
                           />
                         }
+                        onClick={() => navigate(`/products/${product.id}`)}
                       >
                         <Meta
                           title={product.name}
@@ -215,9 +287,40 @@ const ProductsPage = () => {
                               <p style={{ margin: "5px 0", color: "#555" }}>
                                 {product.description?.slice(0, 50)}...
                               </p>
+                              {checkViewed(product.id) ? (
+                                <p style={{ margin: "5px 0", color: "#555" }}>
+                                  <EyeFilled /> đã xem
+                                </p>
+                              ) : (
+                                <p style={{ margin: "5px 0", color: "#555" }}>
+                                  <EyeOutlined /> chưa xem
+                                </p>
+                              )}
                             </>
                           }
                         />
+                        <Button
+                          type="text"
+                          size="middle"
+                          style={{ marginTop: 6 }}
+                          onClick={() => toggleFavorite(product.id)}
+                          icon={
+                            <HeartFilled
+                              style={{
+                                color: favorites.some(
+                                  (p) => p._id === product.id
+                                )
+                                  ? "red"
+                                  : "gray",
+                                fontSize: 18,
+                              }}
+                            />
+                          }
+                        >
+                          {favorites.some((p) => p._id === product.id)
+                            ? "Bỏ yêu thích"
+                            : "Thêm yêu thích"}
+                        </Button>
                       </Card>
                     </Badge.Ribbon>
                   </Col>

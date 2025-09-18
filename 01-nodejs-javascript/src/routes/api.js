@@ -4,6 +4,11 @@ const {
   userLogin,
   getUser,
   getAccount,
+  addFavoriteProduct,
+  removeFavoriteProduct,
+  getFavoriteProduct,
+  addRecentlyViewed,
+  getRecentlyViewed,
 } = require("../controllers/userController");
 const multer = require("multer");
 
@@ -15,8 +20,17 @@ const {
   createProduct,
   getAllProductByCate,
   getAllProduct,
+  getSimilarProduct,
+  getProductDetail,
 } = require("../controllers/productController");
+
 const auth = require("../middleware/auth");
+
+const {
+  addCommentProduct,
+  getProductComments,
+  countComments,
+} = require("../controllers/commentController");
 
 const routerAPI = express.Router();
 
@@ -42,5 +56,21 @@ routerAPI.get("/category", getAllCategory);
 routerAPI.post("/product", uploader.array("files", 5), createProduct);
 routerAPI.get("/product", getAllProduct);
 routerAPI.get("/product/:cateId", getAllProductByCate);
+routerAPI.get("/productDetail/:productId", getProductDetail);
 
-module.exports = routerAPI; //export default
+// Favorite
+routerAPI.post("/addFavorite/:productId", addFavoriteProduct);
+routerAPI.delete("/deleteFavorite/:productId", removeFavoriteProduct);
+routerAPI.get("/favorites", getFavoriteProduct);
+
+//Related Product
+routerAPI.get("/relatedProduct/:productId", getSimilarProduct);
+
+// Recently Viewed
+routerAPI.post("/addViewed/:productId", addRecentlyViewed);
+routerAPI.get("/viewed", getRecentlyViewed);
+
+// Comments
+routerAPI.post("/addComment/:productId", addCommentProduct);
+routerAPI.get("/comments/:productId", getProductComments);
+module.exports = routerAPI;

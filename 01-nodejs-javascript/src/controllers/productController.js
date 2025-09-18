@@ -2,6 +2,8 @@ const {
   createProductService,
   getAllProductByCateService,
   getAllProductService,
+  getSimilarProductService,
+  getProductDetailService,
 } = require("../services/productService");
 const uploadFile = require("../utils/upload");
 const createProduct = async (req, res, next) => {
@@ -94,4 +96,30 @@ const getAllProductByCate = async (req, res, next) => {
   }
 };
 
-module.exports = { createProduct, getAllProductByCate, getAllProduct };
+const getSimilarProduct = async (req, res, next) => {
+  try {
+    const productId = req.params.productId;
+    const similarProducts = await getSimilarProductService(productId);
+    return res.status(200).json(similarProducts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getProductDetail = async (req, res, next) => {
+  try {
+    const productId = req.params.productId;
+    const productDetail = await getProductDetailService(productId);
+    return res.status(200).json(productDetail);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createProduct,
+  getAllProductByCate,
+  getAllProduct,
+  getSimilarProduct,
+  getProductDetail,
+};

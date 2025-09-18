@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import {
+  HeartOutlined,
   MailOutlined,
   ProductFilled,
   SettingOutlined,
@@ -32,6 +33,11 @@ const Header = () => {
             label: <Link to={"/products"}>Products</Link>,
             key: "products",
             icon: <ProductFilled />,
+          },
+          {
+            label: <Link to={"/favorites"}>Favorites</Link>,
+            key: "favorites",
+            icon: <HeartOutlined />,
           },
         ]
       : []),

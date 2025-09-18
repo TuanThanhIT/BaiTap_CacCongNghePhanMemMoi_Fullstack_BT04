@@ -9,6 +9,8 @@ import HomePage from "./pages/home";
 import LoginPage from "./pages/login";
 import ProductsPage from "./pages/products";
 import { AuthWrapper } from "./components/context/authContext";
+import FavoritesPage from "./pages/favorites";
+import ProductDetailPage from "./pages/productDetail";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
       {
         path: "products",
         element: <ProductsPage />,
+      },
+      {
+        path: "favorites",
+        element: <FavoritesPage />,
+      },
+      {
+        path: "products/:productId",
+        element: <ProductDetailPage />,
       },
     ],
   },

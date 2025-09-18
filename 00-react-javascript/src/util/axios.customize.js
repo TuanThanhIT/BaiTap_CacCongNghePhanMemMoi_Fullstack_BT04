@@ -22,19 +22,20 @@ instance.interceptors.request.use(
 
 // Add a response interceptor
 instance.interceptors.response.use(
-  function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
+  (response) => {
     if (response && response.data) {
       return response.data;
     }
     return response;
   },
-  function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    if (error?.response?.data) return error?.response?.data;
-    return Promise.reject(error);
+  (error) => {
+    // Trả về một object lỗi thống nhất
+    const errResponse = error?.response?.data || {
+      statusCode: 500,
+      message: "Có lỗi xảy ra, vui lòng thử lại!",
+    };
+    return Promise.reject(errResponse);
   }
 );
+
 export default instance;
