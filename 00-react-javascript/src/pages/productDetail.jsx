@@ -4,6 +4,7 @@ import {
   getProductDetail,
   getRelatedProductApi,
   postCommentProductApi,
+  postProductCartApi,
   postViewedApi,
 } from "../util/api";
 import { useState, useEffect } from "react";
@@ -36,7 +37,6 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [count, setCount] = useState(0);
 
   const navigate = useNavigate();
   // Lấy chi tiết sản phẩm
@@ -97,12 +97,20 @@ const ProductDetailPage = () => {
       await postCommentProductApi(productId, values.rating, values.content);
       message.success("Gửi đánh giá thành công!");
       await fetchCommentsProduct();
-      await fetchCountComments();
     } catch (err) {
       console.error("Lỗi khi gửi review:", err);
       message.error(err?.message || "Gửi đánh giá thất bại!");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAddToCart = async (productId) => {
+    try {
+      await postProductCartApi(productId);
+      message.success("Thêm sản phẩm vào giỏ hàng thành công");
+    } catch (error) {
+      setError(error?.message || "Xử lý yêu thích thất bại, vui lòng thử lại!");
     }
   };
 
@@ -145,6 +153,7 @@ const ProductDetailPage = () => {
         </Col>
 
         {/* Thông tin sản phẩm */}
+        {/* Thông tin sản phẩm */}
         <Col xs={24} sm={14}>
           <Badge.Ribbon
             text={`Còn ${productDetail.stock} sp`}
@@ -177,6 +186,17 @@ const ProductDetailPage = () => {
                   </>
                 }
               />
+
+              {/* Nút thêm vào giỏ hàng */}
+              <Button
+                type="primary"
+                block
+                style={{ marginTop: 15 }}
+                disabled={productDetail.stock <= 0}
+                onClick={() => handleAddToCart(productDetail._id)}
+              >
+                🛒 Thêm vào giỏ hàng
+              </Button>
             </Card>
           </Badge.Ribbon>
 

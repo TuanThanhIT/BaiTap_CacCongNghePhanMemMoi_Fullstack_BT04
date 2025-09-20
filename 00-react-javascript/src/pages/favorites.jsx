@@ -12,8 +12,14 @@ import {
   Empty,
   Button,
   notification,
+  message,
 } from "antd";
-import { getFavoritesApi, deleteFavoriteApi } from "../util/api";
+import {
+  getFavoritesApi,
+  deleteFavoriteApi,
+  postProductCartApi,
+} from "../util/api";
+import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
 const { Meta } = Card;
@@ -22,6 +28,7 @@ const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // Lấy danh sách yêu thích
   const fetchFavorites = async () => {
@@ -59,6 +66,16 @@ const FavoritesPage = () => {
       );
     }
   };
+
+  const handleAddToCart = async (productId) => {
+    try {
+      await postProductCartApi(productId);
+      message.success("Thêm sản phẩm vào giỏ hàng thành công");
+    } catch (error) {
+      setError(error?.message || "Xử lý yêu thích thất bại, vui lòng thử lại!");
+    }
+  };
+
   if (loading)
     return (
       <div
@@ -100,14 +117,14 @@ const FavoritesPage = () => {
                   hoverable
                   style={{
                     borderRadius: 10,
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                    boxShadow: "0 2px 8px #f0f1f2",
                   }}
                   cover={
                     <img
                       alt={product.name}
                       src={product.images?.[0]}
                       style={{
-                        height: 180, // cao hơn bản nhỏ
+                        height: 200,
                         objectFit: "cover",
                         borderTopLeftRadius: 10,
                         borderTopRightRadius: 10,
@@ -116,11 +133,7 @@ const FavoritesPage = () => {
                   }
                 >
                   <Meta
-                    title={
-                      <span style={{ fontSize: 15, fontWeight: 600 }}>
-                        {product.name}
-                      </span>
-                    }
+                    title={product.name}
                     description={
                       <>
                         <p
@@ -128,34 +141,53 @@ const FavoritesPage = () => {
                             margin: 0,
                             fontWeight: "bold",
                             color: "#d4380d",
-                            fontSize: 14,
                           }}
                         >
                           {product.price.toLocaleString()} VNĐ
                         </p>
-                        <p
-                          style={{
-                            margin: "4px 0",
-                            color: "#666",
-                            fontSize: 13,
-                          }}
-                        >
+                        <p style={{ margin: "5px 0", color: "#555" }}>
                           {product.description?.slice(0, 50)}...
                         </p>
                       </>
                     }
                   />
 
+                  {/* Hàng nút 1: Thêm giỏ + Yêu thích */}
+                  <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                    <Button
+                      type="primary"
+                      size="middle"
+                      style={{ flex: 1, borderRadius: 6 }}
+                      onClick={() => handleAddToCart(product.id)}
+                    >
+                      🛒 Thêm giỏ
+                    </Button>
+
+                    <Button
+                      type="text"
+                      size="middle"
+                      style={{ marginTop: 6 }}
+                      onClick={() => handleRemoveFavorite(product._id)}
+                      icon={
+                        <HeartFilled style={{ color: "red", fontSize: 18 }} />
+                      }
+                    >
+                      Bỏ yêu thích
+                    </Button>
+                  </div>
+
+                  {/* Hàng nút 2: Xem chi tiết */}
                   <Button
-                    type="text"
+                    type="default"
                     size="middle"
-                    style={{ marginTop: 6 }}
-                    onClick={() => handleRemoveFavorite(product._id)}
-                    icon={
-                      <HeartFilled style={{ color: "red", fontSize: 18 }} />
-                    }
+                    style={{
+                      marginTop: 8,
+                      width: "100%",
+                      borderRadius: 6,
+                    }}
+                    onClick={() => navigate(`/products/${product._id}`)}
                   >
-                    Bỏ yêu thích
+                    🔎 Xem chi tiết
                   </Button>
                 </Card>
               </Badge.Ribbon>

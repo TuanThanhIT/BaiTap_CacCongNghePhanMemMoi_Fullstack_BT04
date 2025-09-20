@@ -11,6 +11,9 @@ import ProductsPage from "./pages/products";
 import { AuthWrapper } from "./components/context/authContext";
 import FavoritesPage from "./pages/favorites";
 import ProductDetailPage from "./pages/productDetail";
+import CartPage from "./pages/cart";
+import CheckoutPage from "./pages/checkout";
+import OrderPage from "./pages/order";
 
 const router = createBrowserRouter([
   {
@@ -34,8 +37,20 @@ const router = createBrowserRouter([
         element: <FavoritesPage />,
       },
       {
+        path: "cart",
+        element: <CartPage />,
+      },
+      {
         path: "products/:productId",
         element: <ProductDetailPage />,
+      },
+      {
+        path: "checkout",
+        element: <CheckoutPage />,
+      },
+      {
+        path: "order",
+        element: <OrderPage />,
       },
     ],
   },

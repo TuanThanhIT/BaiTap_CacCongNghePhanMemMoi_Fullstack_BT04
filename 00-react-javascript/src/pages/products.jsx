@@ -13,6 +13,7 @@ import {
   Button,
   InputNumber,
   notification,
+  message,
 } from "antd";
 import CategoryList from "../components/categoryList";
 import {
@@ -22,6 +23,7 @@ import {
   getFavoritesApi,
   getProductsByCateApi,
   getViewedApi,
+  postProductCartApi,
 } from "../util/api";
 import { EyeFilled, EyeOutlined, HeartFilled } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -163,6 +165,14 @@ const ProductsPage = () => {
     fetchProducts(1, selectedCate, searchTerm, minPrice, maxPrice);
   };
 
+  const handleAddToCart = async (productId) => {
+    try {
+      await postProductCartApi(productId);
+      message.success("Thêm sản phẩm vào giỏ hàng thành công");
+    } catch (error) {
+      setError(error?.message || "Xử lý yêu thích thất bại, vui lòng thử lại!");
+    }
+  };
   if (loading)
     return (
       <div
@@ -269,7 +279,6 @@ const ProductsPage = () => {
                             }}
                           />
                         }
-                        onClick={() => navigate(`/products/${product.id}`)}
                       >
                         <Meta
                           title={product.name}
@@ -299,27 +308,54 @@ const ProductsPage = () => {
                             </>
                           }
                         />
+
+                        {/* Hàng nút 1: Thêm giỏ + Yêu thích */}
+                        <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                          <Button
+                            type="primary"
+                            size="middle"
+                            style={{ flex: 1, borderRadius: 6 }}
+                            onClick={() => handleAddToCart(product.id)}
+                          >
+                            🛒 Thêm giỏ
+                          </Button>
+
+                          <Button
+                            type="text"
+                            size="middle"
+                            style={{ flex: 1 }}
+                            onClick={() => toggleFavorite(product.id)}
+                            icon={
+                              <HeartFilled
+                                style={{
+                                  color: favorites.some(
+                                    (p) => p._id === product.id
+                                  )
+                                    ? "red"
+                                    : "gray",
+                                  fontSize: 18,
+                                }}
+                              />
+                            }
+                          >
+                            {favorites.some((p) => p._id === product.id)
+                              ? "Bỏ yêu thích"
+                              : "Yêu thích"}
+                          </Button>
+                        </div>
+
+                        {/* Hàng nút 2: Xem chi tiết */}
                         <Button
-                          type="text"
+                          type="default"
                           size="middle"
-                          style={{ marginTop: 6 }}
-                          onClick={() => toggleFavorite(product.id)}
-                          icon={
-                            <HeartFilled
-                              style={{
-                                color: favorites.some(
-                                  (p) => p._id === product.id
-                                )
-                                  ? "red"
-                                  : "gray",
-                                fontSize: 18,
-                              }}
-                            />
-                          }
+                          style={{
+                            marginTop: 8,
+                            width: "100%",
+                            borderRadius: 6,
+                          }}
+                          onClick={() => navigate(`/products/${product.id}`)}
                         >
-                          {favorites.some((p) => p._id === product.id)
-                            ? "Bỏ yêu thích"
-                            : "Thêm yêu thích"}
+                          🔎 Xem chi tiết
                         </Button>
                       </Card>
                     </Badge.Ribbon>

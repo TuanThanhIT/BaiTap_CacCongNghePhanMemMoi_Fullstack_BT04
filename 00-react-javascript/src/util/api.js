@@ -117,6 +117,53 @@ const postViewedApi = async (productId) => {
   return instance.post(URL_API);
 };
 
+const getProductsCartApi = async () => {
+  let URL_API = `v1/api/carts`;
+  return instance.get(URL_API);
+};
+
+const patchQuantityApi = async (productId, quantity) => {
+  let URL_API = `v1/api/cart/update/${productId}`;
+  const data = {
+    quantity,
+  };
+  return instance.patch(URL_API, data);
+};
+
+const deleteProductCartApi = async (productId) => {
+  let URL_API = `v1/api/cart/delete/${productId}`;
+  return instance.delete(URL_API);
+};
+
+const deleteAllProductCartAPi = async () => {
+  let URL_API = `v1/api/cart/deleteAll`;
+  return instance.delete(URL_API);
+};
+
+const postProductCartApi = async (productId) => {
+  let URL_API = `v1/api/cart/add/${productId}`;
+  return instance.post(URL_API);
+};
+
+const postOrderApi = async (shippingAddress, paymentMethod) => {
+  let URL_API = `v1/api/order/add`;
+  const data = {
+    shippingAddress,
+    paymentMethod,
+  };
+  return instance.post(URL_API, data);
+};
+
+const getUserOrderApi = async () => {
+  let URL_API = `v1/api/user/order`;
+  return instance.get(URL_API);
+};
+
+const putCancelOrderApi = async (orderId) => {
+  let URL_API = `v1/api/order/cancel/${orderId}`;
+  return instance.put(URL_API);
+};
+
 export {
   createUserApi,
   loginApi,
@@ -133,5 +180,12 @@ export {
   getRelatedProductApi,
   getViewedApi,
   postViewedApi,
-  countCommentsApi,
+  getProductsCartApi,
+  patchQuantityApi,
+  deleteProductCartApi,
+  deleteAllProductCartAPi,
+  postProductCartApi,
+  postOrderApi,
+  getUserOrderApi,
+  putCancelOrderApi,
 };

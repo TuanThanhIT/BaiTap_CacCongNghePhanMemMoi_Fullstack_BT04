@@ -2,8 +2,10 @@ import React, { useContext, useState } from "react";
 import {
   HeartOutlined,
   MailOutlined,
+  OrderedListOutlined,
   ProductFilled,
   SettingOutlined,
+  ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Menu } from "antd";
@@ -38,6 +40,16 @@ const Header = () => {
             label: <Link to={"/favorites"}>Favorites</Link>,
             key: "favorites",
             icon: <HeartOutlined />,
+          },
+          {
+            label: <Link to={"/cart"}>Cart</Link>,
+            key: "cart",
+            icon: <ShoppingCartOutlined />,
+          },
+          {
+            label: <Link to={"/order"}>Order</Link>,
+            key: "order",
+            icon: <OrderedListOutlined />,
           },
         ]
       : []),

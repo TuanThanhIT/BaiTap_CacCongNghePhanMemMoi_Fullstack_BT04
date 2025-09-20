@@ -29,8 +29,21 @@ const auth = require("../middleware/auth");
 const {
   addCommentProduct,
   getProductComments,
-  countComments,
 } = require("../controllers/commentController");
+const {
+  addProductCart,
+  getProductCart,
+  updateQuantity,
+  deleteProductCart,
+  deleteAllProductCart,
+} = require("../controllers/cartController");
+const {
+  createOrder,
+  getUserOrders,
+  getOrderById,
+  updateOrderStatus,
+  cancelOrder,
+} = require("../controllers/orderController");
 
 const routerAPI = express.Router();
 
@@ -74,3 +87,17 @@ routerAPI.get("/viewed", getRecentlyViewed);
 routerAPI.post("/addComment/:productId", addCommentProduct);
 routerAPI.get("/comments/:productId", getProductComments);
 module.exports = routerAPI;
+
+// Cart
+routerAPI.post("/cart/add/:productId", addProductCart);
+routerAPI.get("/carts", getProductCart);
+routerAPI.patch("/cart/update/:productId", updateQuantity);
+routerAPI.delete("/cart/delete/:productId", deleteProductCart);
+routerAPI.delete("/cart/deleteAll", deleteAllProductCart);
+
+// Order
+routerAPI.post("/order/add", createOrder); // tạo đơn hàng
+routerAPI.get("/user/order", getUserOrders);
+routerAPI.get("/order/:orderId", getOrderById); // xem chi tiết đơn hàng
+routerAPI.put("/order/:orderId/status", updateOrderStatus); // admin cập nhật trạng thái
+routerAPI.put("/order/cancel/:orderId", cancelOrder); // user hủy đơn hàng
